@@ -1,0 +1,21 @@
+{
+	"name": "my-ai-game",
+	"type": "module",
+	"scripts": {
+		"build": "vite build",
+		"dev": "vite",
+		"preview": "vite preview",
+		"zip": "npm run build && mkdir -p dist && zip -r dist/game.zip dist -x \"**/.DS_Store\"",
+		"generate-map": "node scripts/generate-map.js"
+	},
+	"dependencies": {
+		"canvas": "^3.2.1",
+		"kaplay": "^3001.0.19",
+		"pngjs": "^7.0.0",
+		"reveal.js": "^5.2.1"
+	},
+	"devDependencies": {
+		"@types/node": "^25.2.2",
+		"vite": "^7.3.1"
+	}
+}
