@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI in Gaming</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Reveal.js Core and Theme -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/black.min.css"
+    />
+    <!-- Highlight.js Theme -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/highlight/monokai.min.css"
+    />
+
+    <style>
+      .reveal {
+        --r-heading-font: "Pixelify Sans", sans-serif;
+      }
+
+      /* 1. Lock the grid columns to exactly 50% */
+      .l-two-cols {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 20px;
+      }
+
+      /* 2. Style the code container to scale down and scroll */
+      .reveal pre {
+        width: 100%;
+        margin: 0;
+        font-size: 0.45em !important; /* Tweak this to make the text smaller/larger */
+        overflow: auto !important; /* Restores both horizontal and vertical scrolling! */
+        max-height: 600px !important; /* Prevents the box from growing off the bottom of the slide */
+      }
+
+      /* 3. Ensure the text inside doesn't wrap or get clipped */
+      .reveal pre code {
+        max-height: none !important;
+        white-space: pre !important;
+        word-break: normal !important;
+      }
+
+      .reveal .slides section p,
+      .reveal .slides section ul,
+      .reveal .slides section ol,
+      .reveal .slides section h3,
+      .reveal .slides section h4 {
+        text-align: left;
+        width: 100%;
+      }
+
+      .reveal .slides section ul,
+      .reveal .slides section ol {
+        display: block;
+        margin-left: 1.5em;
+      }
+
+      .reveal .slides section.present.center-slide {
+        height: 100%;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section
+          data-background-image="assets/Presentation/minecraft_ai_bg.png"
+          data-background-size="contain"
+        ></section>
+
+        <section class="center-slide">
+          <h2>Demo: Final Game</h2>
+        </section>
+
+        <section>
+          <h2>Setup</h2>
+          <ul>
+            <li class="fragment">Requirements:</li>
+            <ul>
+              <li class="fragment">Node.js</li>
+            </ul>
+            <li class="fragment">Getting started:</li>
+            <pre class="fragment"><code class="bash">
+git clone https://github.com/aaryanshroff/TODO
+cd TODO
+npm run dev
+          </code></pre>
+            <li class="fragment">Files to modify:</li>
+            <ul>
+              <li class="fragment">TODO</li>
+            </ul>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Pre-reqs</h2>
+          <ul>
+            <li class="fragment">JavaScript</li>
+            <li class="fragment">Dot product of vectors</li>
+            <li class="fragment">Derivatives</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Procedural Generation</h2>
+          <div class="l-two-cols">
+            <div>
+              <ul>
+                <li class="fragment">Goals:</li>
+                <ul>
+                  <li class="fragment">Randomness</li>
+                </ul>
+              </ul>
+            </div>
+            <div class="r-stack">
+              <img
+                style="height: 600px"
+                class="fragment"
+                data-fragment-index="1"
+                src="assets/Presentation/no_mans_sky.jpg"
+              />
+              <img
+                style="height: 600px"
+                class="fragment"
+                data-fragment-index="2"
+                src="assets/Presentation/minecraft.jpg"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Not all randomness is equal</h2>
+          <div class="l-two-cols">
+            <div>
+              <p class="fragment">True Randomness</p>
+              <img
+                class="fragment"
+                src="assets/Presentation/kalshi.png"
+                style="max-height: 400px"
+              />
+            </div>
+            <div>
+              <p class="fragment">Pseudo-randomness</p>
+              <img
+                class="fragment"
+                src="assets/Presentation/stake.png"
+                style="max-height: 400px"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h3>True Randomness: Sources</h3>
+          <div class="l-two-cols">
+            <div>
+              <ul>
+                <li class="fragment">Coin toss, dice rolls</li>
+                <li class="fragment">Natural phenomenon</li>
+              </ul>
+            </div>
+            <div>
+              <figure class="fragment">
+                <img
+                  src="assets/Presentation/cloudflare.jpg"
+                  style="max-height: 400px"
+                />
+                <figcaption>
+                  <small
+                    ><a href="https://en.wikipedia.org/wiki/Lavarand"
+                      ><u>Cloudflare HQ, San Francisco</u></a
+                    ></small
+                  >
+                </figcaption>
+              </figure>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h3>True Randomness: Problems</h3>
+          <img
+            class="fragment"
+            src="assets/Presentation/randomness_comic.webp"
+          />
+          <ul>
+            <li class="fragment">Computers are deterministic</li>
+            <li class="fragment">
+              Really expensive to measure real-world phenomenon
+            </li>
+            <li class="fragment">Hard to reproduce!</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>Pseudo-randomness</h3>
+
+          <pre><code class="javascript" data-trim data-line-numbers="1-12|2">
+class RNG {
+  constructor(seed) { this.val = seed; }
+  next() {
+    this.val = (1103515245 * this.val + 12345) % 2147483648;
+    return this.val;
+  }
+}
+
+const rng = new LCG(12345);
+console.log(rng.next()); // 1406932606
+console.log(rng.next()); // 654583775
+          </code></pre>
+
+          <ul>
+            <li class="fragment"><b>Seed</b> enables reproducability</li>
+            <li class="fragment">
+              Faster/cheaper than taking pictures of lava lamps all day!
+            </li>
+            <li class="fragment">Linear Congruential Generator</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Procedural Generation</h2>
+          <div class="l-two-cols">
+            <div>
+              <ul>
+                <li>Goals:</li>
+                <ul>
+                  <li><s>Randomness</s> <br />Pseudo-randomness</li>
+                  <li class="fragment">...is that enough?</li>
+                </ul>
+              </ul>
+            </div>
+            <div>
+              <img
+                style="height: 650px"
+                src="assets/Presentation/minecraft.jpg"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section class="center-slide">
+          <h2>Demo: Random Noise</h2>
+        </section>
+
+        <section>
+          <h2>Procedural Generation</h2>
+          <div class="l-two-cols">
+            <div>
+              <ul>
+                <li>Goals:</li>
+                <ul>
+                  <li><s>Randomness</s> <br />Pseudo-randomness</li>
+                  <li class="fragment">
+                    <b>Spatial correlation</b> <br />(smooth transitions between
+                    random values)
+                  </li>
+                </ul>
+              </ul>
+            </div>
+            <div>
+              <img
+                style="height: 600px"
+                src="assets/Presentation/minecraft.jpg"
+              />
+            </div>
+          </div>
+        </section>
+
+        <!-- Slide 13 -->
+        <section>
+          <h2>Value Noise</h2>
+          <div class="r-stack">
+            <img
+              class="fragment"
+              data-fragment-index="1"
+              src="assets/Presentation/grid.png"
+              style="height: 500px"
+            />
+            <img
+              class="fragment"
+              data-fragment-index="2"
+              src="assets/Presentation/value_noise_words.png"
+              style="height: 500px"
+            />
+            <img
+              class="fragment"
+              data-fragment-index="4"
+              src="assets/Presentation/value_noise_binary.png"
+              style="height: 500px"
+            />
+          </div>
+          <p class="fragment" data-fragment-index="3">
+            What colour should the points within the cells be?
+          </p>
+        </section>
+
+        <!-- Slide 14 -->
+        <section>
+          <h2>Linear Interpolation (1D)</h2>
+          <div class="l-two-cols">
+            <div>
+              <pre
+                class="fragment"
+                data-fragment-index="5"
+              ><code class="javascript" data-trim data-line-numbers="13-19" data-fragment-index="2">
+function lerp(startValue, endValue, t) {
+    return startValue + t * (endValue - startValue);
+}
+              </code>
+              </pre>
+            </div>
+            <div class="r-stack">
+              <img
+                class="fragment"
+                data-fragment-index="1"
+                src="assets/Presentation/linear_1_points.png"
+                style="height: 400px"
+              />
+              <img
+                class="fragment"
+                data-fragment-index="3"
+                src="assets/Presentation/linear_2_curve.png"
+                style="height: 400px"
+              />
+              <img
+                class="fragment"
+                data-fragment-index="4"
+                src="assets/Presentation/linear_3_threshold.png"
+                style="height: 400px"
+              />
+            </div>
+          </div>
+        </section>
+
+        <!-- Slide 15 -->
+        <section>
+          <h2>Bilinear Interpolation (2D)</h2>
+          <div class="l-two-cols">
+            <div>
+              <pre
+                class="fragment"
+                data-fragment-index="5"
+              ><code class="javascript" data-trim data-line-numbers="13-19">
+function lerp(startValue, endValue, t) {
+    return startValue + t * (endValue - startValue);
+}
+
+function bilinearInterpolate(
+    topLeftValue, 
+    topRightValue, 
+    bottomLeftValue, 
+    bottomRightValue, 
+    percentX, 
+    percentY
+) {
+    const topEdgeValue = lerp(topLeftValue, 
+      topRightValue, percentX);
+    const bottomEdgeValue = lerp(bottomLeftValue, 
+      bottomRightValue, percentX);
+    
+    return lerp(topEdgeValue, bottomEdgeValue, 
+      percentY);
+}
+            </code></pre>
+            </div>
+            <div class="r-stack">
+              <img
+                class="fragment"
+                data-fragment-index="1"
+                src="assets/Presentation/grid.png"
+                style="height: 500px"
+              />
+              <img
+                class="fragment"
+                data-fragment-index="2"
+                src="assets/Presentation/value_noise_words.png"
+                style="height: 500px"
+              />
+              <img
+                class="fragment"
+                data-fragment-index="3"
+                src="assets/Presentation/value_noise_binary.png"
+                style="height: 500px"
+              />
+              <img
+                class="fragment"
+                data-fragment-index="4"
+                src="assets/Presentation/value_noise_intermediate.png"
+                style="height: 500px"
+              />
+              <img
+                class="fragment"
+                data-fragment-index="6"
+                src="assets/Presentation/value_noise_interpolated.png"
+                style="height: 500px"
+              />
+              <img
+                class="fragment"
+                data-fragment-index="8"
+                src="assets/Presentation/linear_interpolated.png"
+                style="height: 500px"
+              />
+            </div>
+          </div>
+          <p class="fragment" data-fragment-index="7">Problems?</p>
+        </section>
+
+        <!-- Slide 16 -->
+        <section>
+          <h2>1D interpolation with fading</h2>
+          <div class="l-two-cols">
+            <div>
+              <pre><code class="javascript" data-trim>
+function fade(t) {
+    return 6 * t**5 - 15 * t**4 + 10 * t**3;
+}
+
+function lerp(start, end, t) {
+    return start + t * (end - start);
+}
+
+function smoothBilinear(v00, v10, v01, v11, x, y) {
+    const top = lerp(v00, v10, fade(x));
+    const bottom = lerp(v01, v11, fade(x));
+    
+    return lerp(top, bottom, fade(y));
+}
+          </code></pre>
+            </div>
+            <div>
+              <img src="assets/Presentation/fade_interpolated.png" />
+            </div>
+          </div>
+          <ul>
+            <li class="fragment">
+              Pick any $\text{fade}(t)$ as long as $\text{fade}'(0) =
+              \text{fade}'(1) = 0$
+            </li>
+          </ul>
+        </section>
+
+        <!-- Slide 17 -->
+        <section class="center-slide">
+          <h2>Demo: Value Noise</h2>
+        </section>
+
+        <!-- Slide 18 -->
+        <section>
+          <h2>Value Noise: Problems</h2>
+          <ul>
+            <li class="fragment">
+              Sharp transitions <i>within</i> cells $\Rightarrow$ Fixed by using
+              floats
+            </li>
+            <li class="fragment">
+              Sharp transitions <i>between</i> cells $\Rightarrow$ Fixed by
+              using fading
+            </li>
+            <li class="fragment">
+              Blobby (axis-aligned) map $\Rightarrow$ ???
+            </li>
+          </ul>
+        </section>
+
+        <!-- Slide 19 -->
+        <section>
+          <h2>Perlin Noise</h2>
+          <div class="r-stack">
+            <img
+              class="fragment"
+              src="assets/Presentation/perlin_1_grid.png"
+              style="height: 600px"
+            />
+            <img
+              class="fragment"
+              src="assets/Presentation/perlin_2_vectors.png"
+              style="height: 600px"
+            />
+            <img
+              class="fragment"
+              src="assets/Presentation/perlin_3_distance_math.png"
+              style="height: 600px"
+            />
+            <img
+              class="fragment"
+              src="assets/Presentation/perlin_4_map.png"
+              style="height: 600px"
+            />
+          </div>
+        </section>
+
+        <!-- Slide 20 -->
+        <section class="center-slide">
+          <h2>Demo: Perlin Noise</h2>
+        </section>
+
+        <!-- Slide 21 -->
+        <section>
+          <h2>Biomes</h2>
+          <ul>
+            <li class="fragment">
+              Perlin noise is just a grid of values $\in (0, 1)$
+            </li>
+            <li class="fragment">
+              $\Rightarrow$ what you do with the grid is upto you <br />
+              (not limited to land/water)
+            </li>
+            <li class="fragment">
+              E.g.
+              <ul>
+                <li class="fragment">
+                  Elevation grid: Ocean $\rightarrow$ Beach $\rightarrow$ Plains
+                  $\rightarrow$ Mountain
+                </li>
+                <li class="fragment">
+                  Moisture grid: Dry $\rightarrow$ Normal $\rightarrow$ Wet
+                </li>
+                <li class="fragment">
+                  High Elevation + Low Moisture = Scorched Mountain
+                </li>
+                <li class="fragment">
+                  High Elevation + High Moisture = Snowy Peak
+                </li>
+                <li class="fragment">Low Elevation + Low Moisture = Desert</li>
+                <li class="fragment">
+                  Low Elevation + High Moisture = Swamp / Jungle
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </section>
+
+        <!-- Slide 22 -->
+        <section>
+          <h2>Biomes</h2>
+          <div class="r-stack">
+            <div class="l-two-cols fragment fade-out" data-fragment-index="4">
+              <div class="r-stack">
+                <img
+                  class="fragment"
+                  data-fragment-index="1"
+                  style="height: 600px"
+                  src="assets/Presentation/elevation_1_grid.png"
+                />
+                <img
+                  class="fragment"
+                  data-fragment-index="2"
+                  style="height: 600px"
+                  src="assets/Presentation/elevation_2_vectors.png"
+                />
+                <img
+                  class="fragment"
+                  data-fragment-index="3"
+                  style="height: 600px"
+                  src="assets/Presentation/elevation_3_math.png"
+                />
+              </div>
+              <div class="r-stack">
+                <img
+                  class="fragment"
+                  data-fragment-index="1"
+                  style="height: 600px"
+                  src="assets/Presentation/moisture_1_grid.png"
+                />
+                <img
+                  class="fragment"
+                  data-fragment-index="2"
+                  style="height: 600px"
+                  src="assets/Presentation/moisture_2_vectors.png"
+                />
+                <img
+                  class="fragment"
+                  data-fragment-index="3"
+                  style="height: 600px"
+                  src="assets/Presentation/moisture_3_math.png"
+                />
+              </div>
+            </div>
+            <div class="r-stack">
+              <img
+                class="fragment"
+                data-fragment-index="4"
+                style="height: 600px"
+                src="assets/Presentation/combined_points.png"
+              />
+              <img
+                class="fragment"
+                data-fragment-index="5"
+                style="height: 600px"
+                src="assets/Presentation/final_biome_map.png"
+              />
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/notes/notes.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/math/math.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/highlight/highlight.min.js"></script>
+
+    <script>
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        center: false,
+        hash: true,
+        width: 1280,
+        height: 720,
+        plugins: [RevealMath.MathJax3, RevealHighlight, RevealNotes],
+      });
+    </script>
+  </body>
+</html>
