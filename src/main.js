@@ -20,8 +20,6 @@ const MAX_ENEMIES = 5;
 const ENEMY_SPAWN_INTERVAL = 5;
 
 // --- MAP GENERATION CONFIG ---
-// Change this to "random", "value", or "perlin"
-const NOISE_TYPE = "perlin";
 const MAP_WIDTH_TILES = 100;
 const MAP_HEIGHT_TILES = 100;
 
@@ -74,11 +72,7 @@ function loadImage(url) {
 
 async function start() {
   // GENERATE THE MAP DYNAMICALLY
-  const mapDataUrl = generateMapDataURL(
-    NOISE_TYPE,
-    MAP_WIDTH_TILES,
-    MAP_HEIGHT_TILES,
-  );
+  const mapDataUrl = generateMapDataURL(MAP_WIDTH_TILES, MAP_HEIGHT_TILES);
   const img = await loadImage(mapDataUrl);
 
   const canvas = document.createElement("canvas");
@@ -425,6 +419,7 @@ async function start() {
       if (player.hp <= 0) {
         player.hp = 0;
         player.hidden = true;
+        k.get("enemy").forEach((e) => (e.hidden = true));
         gameOver = true;
       }
     }

@@ -4,6 +4,7 @@ export const SAND_RGB = { r: 194, g: 178, b: 128 };
 
 const NUM_CELLS = 8;
 const MAP_SIZE = 100;
+const NOISE_TYPE = "perlin";
 
 // --- Math Utilities ---
 const lerp = (a, b, t) => a + t * (b - a);
@@ -45,10 +46,34 @@ class RandomNoise extends NoiseGenerator {
 class ValueNoise extends NoiseGenerator {
   constructor() {
     super();
+    this.grid = [];
+    for (let y = 0; y <= NUM_CELLS; y++) {
+      const row = [];
+      for (let x = 0; x <= NUM_CELLS; x++) {
+        row.push(Math.random());
+      }
+      this.grid.push(row);
+    }
   }
 
   getNoise(x, y) {
-    throw new Error("TODO");
+    const xProp = (x / MAP_SIZE) * NUM_CELLS;
+    const gX = Math.floor(xProp);
+    const percentCellX = xProp - gX;
+
+    const yProp = (y / MAP_SIZE) * NUM_CELLS;
+    const gY = Math.floor(yProp);
+    const percentCellY = yProp - gY;
+
+    const topLeft = this.grid[gX][gY];
+    const topRight = this.grid[gX + 1][gY];
+    const bottomLeft = this.grid[gX][gY + 1];
+    const bottomRight = this.grid[gX + 1][gY + 1];
+
+    const topVal = lerp(topLeft, topRight, fade(percentCellX));
+    const bottomVal = lerp(bottomLeft, bottomRight, fade(percentCellX));
+
+    return lerp(topVal, bottomVal, fade(percentCellY));
   }
 }
 
@@ -58,31 +83,76 @@ class ValueNoise extends NoiseGenerator {
 class PerlinNoise extends NoiseGenerator {
   constructor() {
     super();
+    this.grid = [];
+    for (let y = 0; y <= NUM_CELLS; y++) {
+      const row = [];
+      for (let x = 0; x <= NUM_CELLS; x++) {
+        const angle = Math.random() * Math.PI * 2;
+        row.push({
+          x: Math.cos(angle),
+          y: Math.sin(angle),
+        });
+      }
+      this.grid.push(row);
+    }
   }
 
   getNoise(x, y) {
-    throw new Error("TODO");
+    const xProp = (x / MAP_SIZE) * NUM_CELLS;
+    const gX = Math.floor(xProp);
+    const percentCellX = xProp - gX;
+
+    const yProp = (y / MAP_SIZE) * NUM_CELLS;
+    const gY = Math.floor(yProp);
+    const percentCellY = yProp - gY;
+
+    const topLeft = this.grid[gX][gY];
+    const topRight = this.grid[gX + 1][gY];
+    const bottomLeft = this.grid[gX][gY + 1];
+    const bottomRight = this.grid[gX + 1][gY + 1];
+
+    // Dot products
+    const tlDot = dotProduct(topLeft.x, topLeft.y, percentCellX, percentCellY);
+    const trDot = dotProduct(
+      topRight.x,
+      topRight.y,
+      percentCellX - 1,
+      percentCellY,
+    );
+    const blDot = dotProduct(
+      bottomLeft.x,
+      bottomLeft.y,
+      percentCellX,
+      percentCellY - 1,
+    );
+    const brDot = dotProduct(
+      bottomRight.x,
+      bottomRight.y,
+      percentCellX - 1,
+      percentCellY - 1,
+    );
+
+    const topVal = lerp(tlDot, trDot, fade(percentCellX));
+    const bottomVal = lerp(blDot, brDot, fade(percentCellX));
+
+    return (lerp(topVal, bottomVal, fade(percentCellY)) + 1) / 2;
   }
 }
 
 // ---------------------------------------------------------------------------
 // Main Generator Function
 // ---------------------------------------------------------------------------
-export function generateMapDataURL(
-  type = "perlin",
-  width = MAP_SIZE,
-  height = MAP_SIZE,
-) {
+export function generateMapDataURL(width = MAP_SIZE, height = MAP_SIZE) {
   let noiseGen;
 
-  if (type === "random") {
+  if (NOISE_TYPE === "random") {
     noiseGen = new RandomNoise();
-  } else if (type === "value") {
+  } else if (NOISE_TYPE === "value") {
     noiseGen = new ValueNoise();
-  } else if (type === "perlin") {
+  } else if (NOISE_TYPE === "perlin") {
     noiseGen = new PerlinNoise();
   } else {
-    throw new Error(`Unknown noise type: ${type}`);
+    throw new Error(`Unknown noise type: ${NOISE_TYPE}`);
   }
 
   const canvas = document.createElement("canvas");
@@ -97,7 +167,14 @@ export function generateMapDataURL(
 
       let color;
 
-      // TODO 4. Sand
+      // // TODO 4. Sand
+      // if (val >= 0.5) {
+      //   color = LAND_RGB;
+      // } else if (val >= 0.45) {
+      //   color = SAND_RGB;
+      // } else {
+      //   color = WATER_RGB;
+      // }
       color = val >= 0.5 ? LAND_RGB : WATER_RGB;
 
       const i = (y * width + x) * 4;
