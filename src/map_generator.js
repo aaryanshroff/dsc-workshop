@@ -47,7 +47,7 @@ class ValueNoise extends NoiseGenerator {
     super();
   }
 
-  getNoise(tileX, tileY) {
+  getNoise(x, y) {
     throw new Error("TODO");
   }
 }
@@ -60,7 +60,7 @@ class PerlinNoise extends NoiseGenerator {
     super();
   }
 
-  getNoise(tileX, tileY) {
+  getNoise(x, y) {
     throw new Error("TODO");
   }
 }
