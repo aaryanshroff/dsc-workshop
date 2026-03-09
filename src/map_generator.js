@@ -46,34 +46,10 @@ class RandomNoise extends NoiseGenerator {
 class ValueNoise extends NoiseGenerator {
   constructor() {
     super();
-    this.grid = [];
-    for (let y = 0; y <= NUM_CELLS; y++) {
-      const row = [];
-      for (let x = 0; x <= NUM_CELLS; x++) {
-        row.push(Math.random());
-      }
-      this.grid.push(row);
-    }
   }
 
   getNoise(x, y) {
-    const xProp = (x / MAP_SIZE) * NUM_CELLS;
-    const gX = Math.floor(xProp);
-    const percentCellX = xProp - gX;
-
-    const yProp = (y / MAP_SIZE) * NUM_CELLS;
-    const gY = Math.floor(yProp);
-    const percentCellY = yProp - gY;
-
-    const topLeft = this.grid[gX][gY];
-    const topRight = this.grid[gX + 1][gY];
-    const bottomLeft = this.grid[gX][gY + 1];
-    const bottomRight = this.grid[gX + 1][gY + 1];
-
-    const topVal = lerp(topLeft, topRight, fade(percentCellX));
-    const bottomVal = lerp(bottomLeft, bottomRight, fade(percentCellX));
-
-    return lerp(topVal, bottomVal, fade(percentCellY));
+    throw new Error("TODO");
   }
 }
 
@@ -83,59 +59,10 @@ class ValueNoise extends NoiseGenerator {
 class PerlinNoise extends NoiseGenerator {
   constructor() {
     super();
-    this.grid = [];
-    for (let y = 0; y <= NUM_CELLS; y++) {
-      const row = [];
-      for (let x = 0; x <= NUM_CELLS; x++) {
-        const angle = Math.random() * Math.PI * 2;
-        row.push({
-          x: Math.cos(angle),
-          y: Math.sin(angle),
-        });
-      }
-      this.grid.push(row);
-    }
   }
 
   getNoise(x, y) {
-    const xProp = (x / MAP_SIZE) * NUM_CELLS;
-    const gX = Math.floor(xProp);
-    const percentCellX = xProp - gX;
-
-    const yProp = (y / MAP_SIZE) * NUM_CELLS;
-    const gY = Math.floor(yProp);
-    const percentCellY = yProp - gY;
-
-    const topLeft = this.grid[gX][gY];
-    const topRight = this.grid[gX + 1][gY];
-    const bottomLeft = this.grid[gX][gY + 1];
-    const bottomRight = this.grid[gX + 1][gY + 1];
-
-    // Dot products
-    const tlDot = dotProduct(topLeft.x, topLeft.y, percentCellX, percentCellY);
-    const trDot = dotProduct(
-      topRight.x,
-      topRight.y,
-      percentCellX - 1,
-      percentCellY,
-    );
-    const blDot = dotProduct(
-      bottomLeft.x,
-      bottomLeft.y,
-      percentCellX,
-      percentCellY - 1,
-    );
-    const brDot = dotProduct(
-      bottomRight.x,
-      bottomRight.y,
-      percentCellX - 1,
-      percentCellY - 1,
-    );
-
-    const topVal = lerp(tlDot, trDot, fade(percentCellX));
-    const bottomVal = lerp(blDot, brDot, fade(percentCellX));
-
-    return (lerp(topVal, bottomVal, fade(percentCellY)) + 1) / 2;
+    throw new Error("TODO");
   }
 }
 
