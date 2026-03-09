@@ -1,5 +1,5 @@
 import kaplay from "kaplay";
-import { generateMapDataURL, WATER_RGB } from "./map_generator.js";
+import { generateMapDataURL, WATER_RGB, SAND_RGB } from "./map_generator.js";
 
 // ---------------------------------------------------------------------------
 // Config
@@ -7,7 +7,9 @@ import { generateMapDataURL, WATER_RGB } from "./map_generator.js";
 const TILE_SIZE = 16;          
 const PLAYER_SPEED = 200;      
 const TURN_SPEED = 150;        
-const BULLET_SPEED = 400;      
+const BULLET_SPEED = 400;
+const SAND_SPEED_MULTIPLIER = 0.5;
+const ENABLE_SAND = true;
 
 // Enemy config
 const ENEMY_SPEED = 100;       
@@ -70,7 +72,7 @@ function loadImage(url) {
 
 async function start() {
     // GENERATE THE MAP DYNAMICALLY
-    const mapDataUrl = generateMapDataURL(NOISE_TYPE, MAP_WIDTH_TILES, MAP_HEIGHT_TILES, NOISE_SCALE);
+    const mapDataUrl = generateMapDataURL(NOISE_TYPE, MAP_WIDTH_TILES, MAP_HEIGHT_TILES, NOISE_SCALE, { sand: ENABLE_SAND });
     const img = await loadImage(mapDataUrl);
 
     const canvas = document.createElement("canvas");
@@ -84,18 +86,34 @@ async function start() {
     const MAP_W = img.width;
     const MAP_H = img.height;
 
-    // Build walkability grid
-    const walkable = new Uint8Array(MAP_W * MAP_H);
+    // Build terrain grid: 0 = water, 1 = land, 2 = sand
+    const terrain = new Uint8Array(MAP_W * MAP_H);
     for (let i = 0; i < MAP_W * MAP_H; i++) {
         const r = pixels[i * 4];
         const g = pixels[i * 4 + 1];
         const b = pixels[i * 4 + 2];
-        walkable[i] = (r === WATER_RGB.r && g === WATER_RGB.g && b === WATER_RGB.b) ? 0 : 1;
+        if (r === WATER_RGB.r && g === WATER_RGB.g && b === WATER_RGB.b) {
+            terrain[i] = 0;
+        } else if (r === SAND_RGB.r && g === SAND_RGB.g && b === SAND_RGB.b) {
+            terrain[i] = 2;
+        } else {
+            terrain[i] = 1;
+        }
+    }
+
+    function getTerrain(tileX, tileY) {
+        if (tileX < 0 || tileX >= MAP_W || tileY < 0 || tileY >= MAP_H) return 0;
+        return terrain[tileY * MAP_W + tileX];
     }
 
     function isWalkable(tileX, tileY) {
-        if (tileX < 0 || tileX >= MAP_W || tileY < 0 || tileY >= MAP_H) return false;
-        return walkable[tileY * MAP_W + tileX] === 1;
+        return getTerrain(tileX, tileY) !== 0;
+    }
+
+    function getSpeedMultiplier(x, y) {
+        const tileX = Math.floor(x / TILE_SIZE);
+        const tileY = Math.floor(y / TILE_SIZE);
+        return getTerrain(tileX, tileY) === 2 ? SAND_SPEED_MULTIPLIER : 1.0;
     }
 
     // -----------------------------------------------------------------------
@@ -108,12 +126,14 @@ async function start() {
     bigCtx.imageSmoothingEnabled = false;
 
     const sheetImg = await loadImage(SPRITESHEET_URL);
-    const WATER_TILE_INDEX = 0; 
-    const LAND_TILE_INDEX = 5;  
+    const WATER_TILE_INDEX = 0;
+    const LAND_TILE_INDEX = 5;
+    const SAND_TILE_INDEX = 4;
 
     for (let ty = 0; ty < MAP_H; ty++) {
         for (let tx = 0; tx < MAP_W; tx++) {
-            const tileIdx = walkable[ty * MAP_W + tx] ? LAND_TILE_INDEX : WATER_TILE_INDEX;
+            const t = terrain[ty * MAP_W + tx];
+            const tileIdx = t === 2 ? SAND_TILE_INDEX : t === 1 ? LAND_TILE_INDEX : WATER_TILE_INDEX;
             const meta = atlas[`tile_${tileIdx}`];
             if (meta) {
                 bigCtx.drawImage(
@@ -226,8 +246,9 @@ async function start() {
 
         if (moveDir !== 0) {
             const rad = (player.angle - 90) * (Math.PI / 180);
-            const vx = Math.cos(rad) * moveDir * PLAYER_SPEED * k.dt();
-            const vy = Math.sin(rad) * moveDir * PLAYER_SPEED * k.dt();
+            const speed = PLAYER_SPEED * getSpeedMultiplier(player.pos.x, player.pos.y);
+            const vx = Math.cos(rad) * moveDir * speed * k.dt();
+            const vy = Math.sin(rad) * moveDir * speed * k.dt();
 
             if (canMoveTo(player.pos.x + vx, player.pos.y)) player.pos.x += vx;
             if (canMoveTo(player.pos.x, player.pos.y + vy)) player.pos.y += vy;
@@ -246,8 +267,9 @@ async function start() {
 
         if (dist > ENEMY_RANGE) {
             const rad = (enemy.angle - 90) * (Math.PI / 180);
-            const vx = Math.cos(rad) * ENEMY_SPEED * k.dt();
-            const vy = Math.sin(rad) * ENEMY_SPEED * k.dt();
+            const speed = ENEMY_SPEED * getSpeedMultiplier(enemy.pos.x, enemy.pos.y);
+            const vx = Math.cos(rad) * speed * k.dt();
+            const vy = Math.sin(rad) * speed * k.dt();
 
             if (canMoveTo(enemy.pos.x + vx, enemy.pos.y)) enemy.pos.x += vx;
             if (canMoveTo(enemy.pos.x, enemy.pos.y + vy)) enemy.pos.y += vy;

@@ -1,5 +1,6 @@
 export const WATER_RGB = { r: 50, g: 100, b: 200 };
 export const LAND_RGB = { r: 74, g: 222, b: 128 }; // #4ade80
+export const SAND_RGB = { r: 194, g: 178, b: 128 };
 
 // --- Math Utilities ---
 const lerp = (a, b, t) => a + t * (b - a);
@@ -125,7 +126,7 @@ class PerlinNoise extends NoiseGenerator {
 // ---------------------------------------------------------------------------
 // Main Generator Function
 // ---------------------------------------------------------------------------
-export function generateMapDataURL(type = "perlin", width = 100, height = 100, scale = 0.08) {
+export function generateMapDataURL(type = "perlin", width = 100, height = 100, scale = 0.08, { sand = false } = {}) {
     let noiseGen;
 
     if (type === "random") {
@@ -148,8 +149,14 @@ export function generateMapDataURL(type = "perlin", width = 100, height = 100, s
         for (let x = 0; x < width; x++) {
             const val = noiseGen.getNoise(x * scale, y * scale);
             
-            const isLand = val >= 0.5;
-            const color = isLand ? LAND_RGB : WATER_RGB;
+            let color;
+            if (sand && val >= 0.45 && val < 0.5) {
+                color = SAND_RGB;
+            } else if (val >= 0.5) {
+                color = LAND_RGB;
+            } else {
+                color = WATER_RGB;
+            }
 
             const i = (y * width + x) * 4;
             imgData.data[i]     = color.r;
