@@ -17,6 +17,8 @@ const ENEMY_RANGE = 250;
 const ENEMY_FIRE_RATE = 1.5;
 const PLAYER_MAX_HP = 5;
 const ENEMY_MAX_HP = 3;
+const MAX_ENEMIES = 5;
+const ENEMY_SPAWN_INTERVAL = 5;
 
 // --- MAP GENERATION CONFIG ---
 // Change this to "random", "value", or "perlin"
@@ -232,14 +234,67 @@ async function start() {
         ]);
     }
 
-    for(let i = 0; i < 5; i++) {
+    for (let i = 0; i < MAX_ENEMIES; i++) {
         spawnEnemy();
     }
+
+    let spawnTimer = 0;
+    k.onUpdate(() => {
+        if (gameOver) return;
+        spawnTimer += k.dt();
+        if (spawnTimer >= ENEMY_SPAWN_INTERVAL && k.get("enemy").length < MAX_ENEMIES) {
+            spawnEnemy();
+            spawnTimer = 0;
+        }
+    });
+
+    // -----------------------------------------------------------------------
+    // Score & Map Toggle
+    // -----------------------------------------------------------------------
+    let score = 0;
+    let showMap = false;
+    let gameOver = false;
+
+    k.add([
+        k.rect(50, 20),
+        k.pos(k.width() - 60, 10),
+        k.color(60, 60, 60),
+        k.fixed(),
+        k.z(100),
+        k.area(),
+        k.anchor("topleft"),
+        "mapBtn",
+    ]);
+
+    k.add([
+        k.text("Map", { size: 12 }),
+        k.pos(k.width() - 35, 20),
+        k.fixed(),
+        k.z(101),
+        k.anchor("center"),
+        k.color(255, 255, 255),
+        "mapBtnText",
+    ]);
+
+    k.onClick("mapBtn", () => {
+        showMap = !showMap;
+        if (showMap) {
+            const mapW = MAP_W * TILE_SIZE;
+            const mapH = MAP_H * TILE_SIZE;
+            const scaleX = k.width() / mapW;
+            const scaleY = k.height() / mapH;
+            k.setCamScale(Math.min(scaleX, scaleY));
+            k.setCamPos(k.vec2(mapW / 2, mapH / 2));
+        } else {
+            k.setCamScale(2);
+        }
+    });
 
     // -----------------------------------------------------------------------
     // Core Logic (Movement, Camera, AI)
     // -----------------------------------------------------------------------
     k.onUpdate(() => {
+        if (gameOver) return;
         if (k.isKeyDown("left") || k.isKeyDown("a")) player.angle -= TURN_SPEED * k.dt();
         if (k.isKeyDown("right") || k.isKeyDown("d")) player.angle += TURN_SPEED * k.dt();
 
@@ -257,10 +312,13 @@ async function start() {
             if (canMoveTo(player.pos.x, player.pos.y + vy)) player.pos.y += vy;
         }
 
-        k.setCamPos(k.getCamPos().lerp(k.vec2(player.pos.x, player.pos.y), 0.1));
+        if (!showMap) {
+            k.setCamPos(k.getCamPos().lerp(k.vec2(player.pos.x, player.pos.y), 0.1));
+        }
     });
 
     k.onUpdate("enemy", (enemy) => {
+        if (gameOver) return;
         const dx = player.pos.x - enemy.pos.x;
         const dy = player.pos.y - enemy.pos.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -312,15 +370,12 @@ async function start() {
     }
 
     k.onKeyPress("space", () => {
+        if (gameOver) return;
         fireBullet(player, false);
     });
 
     k.onUpdate("bullet", (b) => {
         b.move(b.vx, b.vy);
-        
-        if (!isWalkable(Math.floor(b.pos.x / TILE_SIZE), Math.floor(b.pos.y / TILE_SIZE))) {
-            k.destroy(b);
-        }
     });
 
     k.onCollide("bullet", "enemy", (b, e) => {
@@ -329,6 +384,7 @@ async function start() {
             e.hp--;
             if (e.hp <= 0) {
                 k.destroy(e);
+                score++;
             }
         }
     });
@@ -338,13 +394,15 @@ async function start() {
             k.destroy(b);
             player.hp--;
             if (player.hp <= 0) {
-                k.destroy(player);
+                player.hp = 0;
+                player.hidden = true;
+                gameOver = true;
             }
         }
     });
 
     // -----------------------------------------------------------------------
-    // Health Bars
+    // Health Bars & Score HUD
     // -----------------------------------------------------------------------
     function drawHealthBar(entity) {
         const barW = TILE_SIZE;
@@ -358,8 +416,78 @@ async function start() {
     }
 
     k.onDraw(() => {
-        drawHealthBar(player);
+        if (!gameOver) {
+            drawHealthBar(player);
+        }
         k.get("enemy").forEach(drawHealthBar);
+
+        const cam = k.getCamPos();
+        const camScale = k.getCamScale();
+        const topLeft = k.vec2(cam.x - k.width() / 2 / camScale.x, cam.y - k.height() / 2 / camScale.y);
+        k.drawText({
+            text: `Score: ${score}`,
+            pos: k.vec2(topLeft.x + 5 / camScale.x, topLeft.y + 5 / camScale.y),
+            size: 12 / camScale.x,
+            color: k.rgb(255, 255, 255),
+        });
+
+        if (gameOver) {
+            const cx = cam.x;
+            const cy = cam.y;
+            const s = 1 / camScale.x;
+
+            k.drawRect({
+                pos: k.vec2(cx, cy),
+                width: 200 * s,
+                height: 120 * s,
+                anchor: "center",
+                color: k.rgb(0, 0, 0),
+                opacity: 0.8,
+            });
+            k.drawText({
+                text: "GAME OVER",
+                pos: k.vec2(cx, cy - 30 * s),
+                size: 24 * s,
+                anchor: "center",
+                color: k.rgb(255, 50, 50),
+            });
+            k.drawText({
+                text: `Score: ${score}`,
+                pos: k.vec2(cx, cy),
+                size: 14 * s,
+                anchor: "center",
+                color: k.rgb(255, 255, 255),
+            });
+            k.drawRect({
+                pos: k.vec2(cx, cy + 35 * s),
+                width: 80 * s,
+                height: 22 * s,
+                anchor: "center",
+                color: k.rgb(80, 80, 80),
+            });
+            k.drawText({
+                text: "Restart",
+                pos: k.vec2(cx, cy + 35 * s),
+                size: 12 * s,
+                anchor: "center",
+                color: k.rgb(255, 255, 255),
+            });
+        }
+    });
+
+    k.onClick(() => {
+        if (!gameOver) return;
+        const cam = k.getCamPos();
+        const camScale = k.getCamScale();
+        const mouse = k.mousePos();
+        const worldX = cam.x + (mouse.x - k.width() / 2) / camScale.x;
+        const worldY = cam.y + (mouse.y - k.height() / 2) / camScale.y;
+        const s = 1 / camScale.x;
+        const bx = cam.x - 40 * s;
+        const by = cam.y + 24 * s;
+        if (worldX >= bx && worldX <= bx + 80 * s && worldY >= by && worldY <= by + 22 * s) {
+            location.reload();
+        }
     });
 }
 
