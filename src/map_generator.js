@@ -35,7 +35,7 @@ class RandomNoise extends NoiseGenerator {
   }
 
   getNoise(x, y) {
-    throw new Error("TODO")
+    throw new Error("TODO");
   }
 }
 
@@ -48,7 +48,7 @@ class ValueNoise extends NoiseGenerator {
   }
 
   getNoise(tileX, tileY) {
-    throw new Error("TODO")
+    throw new Error("TODO");
   }
 }
 
@@ -73,8 +73,8 @@ class PerlinNoise extends NoiseGenerator {
   }
 
   getNoise(tileX, tileY) {
-    const nx = tileX * NUM_CELLS / MAP_SIZE;
-    const ny = tileY * NUM_CELLS / MAP_SIZE;
+    const nx = (tileX * NUM_CELLS) / MAP_SIZE;
+    const ny = (tileY * NUM_CELLS) / MAP_SIZE;
     const cx = Math.floor(nx);
     const cy = Math.floor(ny);
     const u = nx - cx;
