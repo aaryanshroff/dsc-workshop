@@ -9,7 +9,6 @@ const PLAYER_SPEED = 200;
 const TURN_SPEED = 150;
 const BULLET_SPEED = 400;
 const SAND_SPEED_MULTIPLIER = 0.15;
-const ENABLE_SAND = false;
 
 // Enemy config
 const ENEMY_SPEED = 100;
@@ -25,7 +24,6 @@ const ENEMY_SPAWN_INTERVAL = 5;
 const NOISE_TYPE = "perlin";
 const MAP_WIDTH_TILES = 100;
 const MAP_HEIGHT_TILES = 100;
-const NOISE_SCALE = 0.08; // Smaller number = larger islands
 
 // ---------------------------------------------------------------------------
 // Init kaplay
@@ -80,8 +78,6 @@ async function start() {
     NOISE_TYPE,
     MAP_WIDTH_TILES,
     MAP_HEIGHT_TILES,
-    NOISE_SCALE,
-    { sand: ENABLE_SAND },
   );
   const img = await loadImage(mapDataUrl);
 
