@@ -2,6 +2,9 @@ export const WATER_RGB = { r: 50, g: 100, b: 200 };
 export const LAND_RGB = { r: 74, g: 222, b: 128 }; // #4ade80
 export const SAND_RGB = { r: 194, g: 178, b: 128 };
 
+const NUM_CELLS = 8;
+const MAP_SIZE = 100;
+
 // --- Math Utilities ---
 const lerp = (a, b, t) => a + t * (b - a);
 const fade = (t) => 6 * t ** 5 - 15 * t ** 4 + 10 * t ** 3;
@@ -29,11 +32,10 @@ class NoiseGenerator {
 class RandomNoise extends NoiseGenerator {
   constructor() {
     super();
-    // No grid precomputation needed for pure random
   }
 
   getNoise(x, y) {
-    return Math.random();
+    throw new Error("TODO")
   }
 }
 
@@ -41,38 +43,12 @@ class RandomNoise extends NoiseGenerator {
 // TODO 2. Value Noise
 // ---------------------------------------------------------------------------
 class ValueNoise extends NoiseGenerator {
-  constructor(width, height, scale) {
+  constructor() {
     super();
-    this.grid = [];
-    const cols = Math.ceil(width * scale) + 2;
-    const rows = Math.ceil(height * scale) + 2;
-
-    for (let y = 0; y < rows; y++) {
-      let row = [];
-      for (let x = 0; x < cols; x++) {
-        row.push(Math.random());
-      }
-      this.grid.push(row);
-    }
   }
 
-  getNoise(x, y) {
-    const cx = Math.floor(x);
-    const cy = Math.floor(y);
-    const u = x - cx;
-    const v = y - cy;
-
-    const v00 = this.grid[cy][cx];
-    const v10 = this.grid[cy][cx + 1];
-    const v01 = this.grid[cy + 1][cx];
-    const v11 = this.grid[cy + 1][cx + 1];
-
-    const uSmooth = fade(u);
-    const vSmooth = fade(v);
-
-    const top = lerp(v00, v10, uSmooth);
-    const bottom = lerp(v01, v11, uSmooth);
-    return lerp(top, bottom, vSmooth);
+  getNoise(tileX, tileY) {
+    throw new Error("TODO")
   }
 }
 
@@ -80,11 +56,11 @@ class ValueNoise extends NoiseGenerator {
 // TODO 3. Perlin Noise
 // ---------------------------------------------------------------------------
 class PerlinNoise extends NoiseGenerator {
-  constructor(width, height, scale) {
+  constructor() {
     super();
     this.grid = [];
-    const cols = Math.ceil(width * scale) + 2;
-    const rows = Math.ceil(height * scale) + 2;
+    const cols = NUM_CELLS + 1;
+    const rows = NUM_CELLS + 1;
 
     for (let y = 0; y < rows; y++) {
       let row = [];
@@ -96,11 +72,13 @@ class PerlinNoise extends NoiseGenerator {
     }
   }
 
-  getNoise(x, y) {
-    const cx = Math.floor(x);
-    const cy = Math.floor(y);
-    const u = x - cx;
-    const v = y - cy;
+  getNoise(tileX, tileY) {
+    const nx = tileX * NUM_CELLS / MAP_SIZE;
+    const ny = tileY * NUM_CELLS / MAP_SIZE;
+    const cx = Math.floor(nx);
+    const cy = Math.floor(ny);
+    const u = nx - cx;
+    const v = ny - cy;
 
     const g00 = this.grid[cy][cx];
     const g10 = this.grid[cy][cx + 1];
@@ -128,19 +106,17 @@ class PerlinNoise extends NoiseGenerator {
 // ---------------------------------------------------------------------------
 export function generateMapDataURL(
   type = "perlin",
-  width = 100,
-  height = 100,
-  scale = 0.08,
-  { sand = false } = {},
+  width = MAP_SIZE,
+  height = MAP_SIZE,
 ) {
   let noiseGen;
 
   if (type === "random") {
     noiseGen = new RandomNoise();
   } else if (type === "value") {
-    noiseGen = new ValueNoise(width, height, scale);
+    noiseGen = new ValueNoise();
   } else if (type === "perlin") {
-    noiseGen = new PerlinNoise(width, height, scale);
+    noiseGen = new PerlinNoise();
   } else {
     throw new Error(`Unknown noise type: ${type}`);
   }
@@ -153,22 +129,12 @@ export function generateMapDataURL(
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      const val = noiseGen.getNoise(x * scale, y * scale);
+      const val = noiseGen.getNoise(x, y);
 
       let color;
 
       // TODO 4. Sand
-      if (sand) {
-        if (val >= 0.45 && val < 0.5) {
-          color = SAND_RGB;
-        } else if (val >= 0.5) {
-          color = LAND_RGB;
-        } else {
-          color = WATER_RGB;
-        }
-      } else {
-        color = val >= 0.5 ? LAND_RGB : WATER_RGB;
-      }
+      color = val >= 0.5 ? LAND_RGB : WATER_RGB;
 
       const i = (y * width + x) * 4;
       imgData.data[i] = color.r;
