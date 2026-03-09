@@ -8,13 +8,15 @@ const TILE_SIZE = 16;
 const PLAYER_SPEED = 200;      
 const TURN_SPEED = 150;        
 const BULLET_SPEED = 400;
-const SAND_SPEED_MULTIPLIER = 0.5;
+const SAND_SPEED_MULTIPLIER = 0.15;
 const ENABLE_SAND = true;
 
 // Enemy config
 const ENEMY_SPEED = 100;       
 const ENEMY_RANGE = 250;       
-const ENEMY_FIRE_RATE = 1.5;   
+const ENEMY_FIRE_RATE = 1.5;
+const PLAYER_MAX_HP = 5;
+const ENEMY_MAX_HP = 3;
 
 // --- MAP GENERATION CONFIG ---
 // Change this to "random", "value", or "perlin"
@@ -128,7 +130,7 @@ async function start() {
     const sheetImg = await loadImage(SPRITESHEET_URL);
     const WATER_TILE_INDEX = 0;
     const LAND_TILE_INDEX = 5;
-    const SAND_TILE_INDEX = 4;
+    const SAND_TILE_INDEX = 8;
 
     for (let ty = 0; ty < MAP_H; ty++) {
         for (let tx = 0; tx < MAP_W; tx++) {
@@ -198,6 +200,7 @@ async function start() {
         k.area({ scale: 0.8 }),
         k.z(1),
         "player",
+        { hp: PLAYER_MAX_HP, maxHp: PLAYER_MAX_HP },
     ]);
 
     k.setCamScale(2);
@@ -225,7 +228,7 @@ async function start() {
             k.area({ scale: 0.8 }),
             k.z(1),
             "enemy",
-            { shotTimer: 0 }
+            { shotTimer: 0, hp: ENEMY_MAX_HP, maxHp: ENEMY_MAX_HP }
         ]);
     }
 
@@ -321,18 +324,42 @@ async function start() {
     });
 
     k.onCollide("bullet", "enemy", (b, e) => {
-        if (!b.isEnemy) { 
+        if (!b.isEnemy) {
             k.destroy(b);
-            k.destroy(e);
-            console.log("Enemy destroyed!");
+            e.hp--;
+            if (e.hp <= 0) {
+                k.destroy(e);
+            }
         }
     });
 
-    k.onCollide("bullet", "player", (b, p) => {
-        if (b.isEnemy) { 
+    k.onCollide("bullet", "player", (b) => {
+        if (b.isEnemy) {
             k.destroy(b);
-            console.log("Player hit!");
+            player.hp--;
+            if (player.hp <= 0) {
+                k.destroy(player);
+            }
         }
+    });
+
+    // -----------------------------------------------------------------------
+    // Health Bars
+    // -----------------------------------------------------------------------
+    function drawHealthBar(entity) {
+        const barW = TILE_SIZE;
+        const barH = 2;
+        const x = entity.pos.x - barW / 2;
+        const y = entity.pos.y - TILE_SIZE * 0.6;
+        const ratio = entity.hp / entity.maxHp;
+
+        k.drawRect({ pos: k.vec2(x, y), width: barW, height: barH, color: k.rgb(80, 80, 80) });
+        k.drawRect({ pos: k.vec2(x, y), width: barW * ratio, height: barH, color: ratio > 0.5 ? k.rgb(0, 200, 0) : k.rgb(200, 0, 0) });
+    }
+
+    k.onDraw(() => {
+        drawHealthBar(player);
+        k.get("enemy").forEach(drawHealthBar);
     });
 }
 
