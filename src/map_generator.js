@@ -24,7 +24,7 @@ class NoiseGenerator {
 }
 
 // ---------------------------------------------------------------------------
-// 1. Pure White Noise
+// TODO 1. Pure White Noise
 // ---------------------------------------------------------------------------
 class RandomNoise extends NoiseGenerator {
     constructor() {
@@ -38,7 +38,7 @@ class RandomNoise extends NoiseGenerator {
 }
 
 // ---------------------------------------------------------------------------
-// 2. Value Noise
+// TODO 2. Value Noise
 // ---------------------------------------------------------------------------
 class ValueNoise extends NoiseGenerator {
     constructor(width, height, scale) {
@@ -77,7 +77,7 @@ class ValueNoise extends NoiseGenerator {
 }
 
 // ---------------------------------------------------------------------------
-// 3. Perlin Noise
+// TODO 3. Perlin Noise
 // ---------------------------------------------------------------------------
 class PerlinNoise extends NoiseGenerator {
     constructor(width, height, scale) {
@@ -150,12 +150,18 @@ export function generateMapDataURL(type = "perlin", width = 100, height = 100, s
             const val = noiseGen.getNoise(x * scale, y * scale);
             
             let color;
-            if (sand && val >= 0.45 && val < 0.5) {
-                color = SAND_RGB;
-            } else if (val >= 0.5) {
-                color = LAND_RGB;
+
+            // TODO 4. Sand
+            if (sand) {
+                if (val >= 0.45 && val < 0.5) {
+                    color = SAND_RGB;
+                } else if (val >= 0.5) {
+                    color = LAND_RGB;
+                } else {
+                    color = WATER_RGB;
+                }
             } else {
-                color = WATER_RGB;
+                color = (val >= 0.5) ? LAND_RGB : WATER_RGB
             }
 
             const i = (y * width + x) * 4;

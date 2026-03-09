@@ -9,7 +9,7 @@ const PLAYER_SPEED = 200;
 const TURN_SPEED = 150;        
 const BULLET_SPEED = 400;
 const SAND_SPEED_MULTIPLIER = 0.15;
-const ENABLE_SAND = true;
+const ENABLE_SAND = false;
 
 // Enemy config
 const ENEMY_SPEED = 100;       
