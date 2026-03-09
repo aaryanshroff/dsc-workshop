@@ -97,13 +97,13 @@
             </ul>
             <li class="fragment">Getting started:</li>
             <pre class="fragment"><code class="bash">
-git clone https://github.com/aaryanshroff/TODO
-cd TODO
+git clone https://github.com/aaryanshroff/dsc-workshop
+cd dsc-workshop
 npm run dev
           </code></pre>
-            <li class="fragment">Files to modify:</li>
+            <li class="fragment">File to modify:</li>
             <ul>
-              <li class="fragment">TODO</li>
+              <li class="fragment"><code>map_generator.js</code></li>
             </ul>
           </ul>
         </section>
@@ -122,9 +122,10 @@ npm run dev
           <div class="l-two-cols">
             <div>
               <ul>
+                <li class="fragment">Algorithmic world generation</li>
                 <li class="fragment">Goals:</li>
                 <ul>
-                  <li class="fragment">Randomness</li>
+                  <li class="fragment">Interesting $\Rightarrow$ Randomness</li>
                 </ul>
               </ul>
             </div>
@@ -423,9 +424,50 @@ function bilinearInterpolate(
           <p class="fragment" data-fragment-index="7">Problems?</p>
         </section>
 
-        <!-- Slide 16 -->
         <section>
           <h2>1D interpolation with fading</h2>
+          <div class="l-two-cols">
+            <div>
+              <pre><code class="javascript" data-trim>
+function fade(t) {
+    return 6 * t**5 - 15 * t**4 + 10 * t**3;
+}
+
+function lerp(start, end, t) {
+    return start + t * (end - start);
+}
+
+function smoothLerp(start, end, t) {
+    return lerp(start, end, fade(t));
+}
+          </code></pre>
+            </div>
+            <div class="r-stack">
+              <img
+                class="fragment"
+                src="assets/Presentation/fade_1_points.png"
+              />
+              <img
+                class="fragment"
+                src="assets/Presentation/fade_2_curve.png"
+              />
+              <img
+                class="fragment"
+                src="assets/Presentation/fade_3_threshold.png"
+              />
+            </div>
+          </div>
+          <ul>
+            <li class="fragment">
+              Pick any $\text{fade}(t)$ as long as $\text{fade}'(0) =
+              \text{fade}'(1) = 0$
+            </li>
+          </ul>
+        </section>
+
+        <!-- Slide 16 -->
+        <section>
+          <h2>2D interpolation with fading</h2>
           <div class="l-two-cols">
             <div>
               <pre><code class="javascript" data-trim>
@@ -449,12 +491,6 @@ function smoothBilinear(v00, v10, v01, v11, x, y) {
               <img src="assets/Presentation/fade_interpolated.png" />
             </div>
           </div>
-          <ul>
-            <li class="fragment">
-              Pick any $\text{fade}(t)$ as long as $\text{fade}'(0) =
-              \text{fade}'(1) = 0$
-            </li>
-          </ul>
         </section>
 
         <!-- Slide 17 -->
