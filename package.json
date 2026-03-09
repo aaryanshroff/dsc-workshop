@@ -4,9 +4,7 @@
 	"scripts": {
 		"build": "vite build",
 		"dev": "vite",
-		"preview": "vite preview",
-		"zip": "npm run build && mkdir -p dist && zip -r dist/game.zip dist -x \"**/.DS_Store\"",
-		"generate-map": "node scripts/generate-map.js"
+		"preview": "vite preview"
 	},
 	"dependencies": {
 		"canvas": "^3.2.1",
